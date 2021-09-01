@@ -20,18 +20,10 @@
 <link rel="stylesheet" href="/css/style.css">
 
   
-    
-<link rel="stylesheet" href="/css/plugins/gitment.css">
-
-  
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
   
-  
-    
-<script src="/js/gitment.js"></script>
-
   
   
   
@@ -197,7 +189,7 @@
 
     <div id="article-banner">
   <h2>ZooKeeper源码阅读——ServerCnxnFactory</h2>
-  <p class="post-date">2021-05-17</p>
+  <p class="post-date">2021-08-29</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -294,8 +286,15 @@
 <li>第15行，读取其他请求，会调用<code>zkServer.processPacket</code>方法</li>
 </ul>
 <p>所以请求都是交给zkServer处理的</p>
-<h4 id="写事件"><a href="#写事件" class="headerlink" title="写事件"></a>写事件</h4><h3 id="ExpiryQueue"><a href="#ExpiryQueue" class="headerlink" title="ExpiryQueue"></a>ExpiryQueue</h3><p>过期队列(按时间排序)，使用<code>SessionTrackerImpl</code>使session过期，使用<code>NIOServerCnxnFactory</code>是连接过期</p>
-</section>
+<h4 id="写事件"><a href="#写事件" class="headerlink" title="写事件"></a>写事件</h4><h1 id="NettyServerCnxnFactory"><a href="#NettyServerCnxnFactory" class="headerlink" title="NettyServerCnxnFactory"></a>NettyServerCnxnFactory</h1><p>使用<code>Netty</code>来支持底层网络通信，就要是要到<code>Netty</code>中的<code>channel pipeline</code>.<br><code>CnxnChannelHandler</code>是<code>NettyServerCnxnFactory</code>使用 <code>Netty</code>时最重要的一个<code>Channel Handler</code>.</p>
+<p>对比<code>NIOServerCnxnFactory</code>，看下<code>NettyServerCnxnFactory.CnxnChannelHandler</code>是如何实现的</p>
+<h3 id="maxClientCnxns-1"><a href="#maxClientCnxns-1" class="headerlink" title="maxClientCnxns"></a>maxClientCnxns</h3><p>在<code>CnxnChannelHandler</code>的<code>channelActive</code>方法中，会对该配置进行校验</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">InetAddress addr = ((InetSocketAddress) channel.remoteAddress()).getAddress();</span><br><span class="line"><span class="keyword">if</span> (maxClientCnxns &gt; <span class="number">0</span> &amp;&amp; getClientCnxnCount(addr) &gt;= maxClientCnxns) &#123;</span><br><span class="line">    ServerMetrics.getMetrics().CONNECTION_REJECTED.add(<span class="number">1</span>);</span><br><span class="line">    LOG.warn(<span class="string">&quot;Too many connections from &#123;&#125; - max is &#123;&#125;&quot;</span>, addr, maxClientCnxns);</span><br><span class="line">    channel.close();</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>和<code>NIOServerCnxnFactory</code>一样，<code>NettyServerCnxnFactory</code>内部也有一个<code>ipMap</code>，用来记录同一个<code>IP</code>地址的连接数量</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;InetAddress, AtomicInteger&gt; ipMap = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br></pre></td></tr></table></figure>
+
+<h3 id="channelRead"><a href="#channelRead" class="headerlink" title="channelRead"></a>channelRead</h3><p>当有读事件时，<code>Netty</code>会调用<code>CnxnChannelHandler.channelRead</code>方法，将消息交给<code>NettyServerCnxn</code>处理，消息的处理流程类似于<code>NIOServerCnxn</code></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><h2 id="NIOServerCnxnFactory的线程模型"><a href="#NIOServerCnxnFactory的线程模型" class="headerlink" title="NIOServerCnxnFactory的线程模型"></a>NIOServerCnxnFactory的线程模型</h2><h2 id="NettyServerCnxnFactory的线程模型"><a href="#NettyServerCnxnFactory的线程模型" class="headerlink" title="NettyServerCnxnFactory的线程模型"></a>NettyServerCnxnFactory的线程模型</h2></section>
     <!-- Tags START -->
     
       <div class="tags">
@@ -317,17 +316,17 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/05/07/zk-code001/">
+      <a class="nav-left" href="/2021/07/23/Spring%E5%9D%91Valid/">
         <span class="nav-arrow">← </span>
         
-          ZooKeeper源码阅读——启动流程
+          Spring的坑——Valid
         
       </a>
     
     
-      <a class="nav-right" href="/2021/07/19/mvc-controless%E2%80%94%E2%80%94%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%BC%80%E6%BA%90%E5%BA%93/">
+      <a class="nav-right" href="/2021/08/29/zk-code003/">
         
-          mvc-controlless——我的第一个开源库
+          ZooKeeper源码阅读——ZooKeeperServer
         
         <span class="nav-arrow"> →</span>
       </a>
@@ -342,9 +341,15 @@
     
     <!-- 二维码 END -->
     
-      <!-- Gitment START -->
-      <div id="comments"></div>
-      <!-- Gitment END -->
+      <!-- Utterances START -->
+      <div id="utterances"></div>
+      <script src="https://utteranc.es/client.js"
+        repo="lanicc/lanicc.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async></script>    
+      <!-- Utterances END -->
     
   </article>
   <!-- Article END -->
@@ -354,7 +359,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#NIOServerCnxnFactory"><span class="toc-nav-text">NIOServerCnxnFactory</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%9C%8B%E4%B8%80%E4%B8%8B%E6%AF%8F%E7%A7%8D%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-nav-text">看一下每种线程的实现</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#AcceptThread"><span class="toc-nav-text">AcceptThread</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#SelectorThread"><span class="toc-nav-text">SelectorThread</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#WorkerService"><span class="toc-nav-text">WorkerService</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ConnectionExpirerThread"><span class="toc-nav-text">ConnectionExpirerThread</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="toc-nav-text">启动流程</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="toc-nav-text">配置</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8"><span class="toc-nav-text">启动</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BB%86%E8%8A%82%E5%88%86%E6%9E%90"><span class="toc-nav-text">细节分析</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#maxClientCnxns"><span class="toc-nav-text">maxClientCnxns</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#IOWorkerRequest"><span class="toc-nav-text">IOWorkerRequest</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#NIOServerCnxn"><span class="toc-nav-text">NIOServerCnxn</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E8%AF%BB%E4%BA%8B%E4%BB%B6"><span class="toc-nav-text">读事件</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%86%99%E4%BA%8B%E4%BB%B6"><span class="toc-nav-text">写事件</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ExpiryQueue"><span class="toc-nav-text">ExpiryQueue</span></a></li></ol></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#NIOServerCnxnFactory"><span class="toc-nav-text">NIOServerCnxnFactory</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%9C%8B%E4%B8%80%E4%B8%8B%E6%AF%8F%E7%A7%8D%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-nav-text">看一下每种线程的实现</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#AcceptThread"><span class="toc-nav-text">AcceptThread</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#SelectorThread"><span class="toc-nav-text">SelectorThread</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#WorkerService"><span class="toc-nav-text">WorkerService</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ConnectionExpirerThread"><span class="toc-nav-text">ConnectionExpirerThread</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="toc-nav-text">启动流程</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="toc-nav-text">配置</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8"><span class="toc-nav-text">启动</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BB%86%E8%8A%82%E5%88%86%E6%9E%90"><span class="toc-nav-text">细节分析</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#maxClientCnxns"><span class="toc-nav-text">maxClientCnxns</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#IOWorkerRequest"><span class="toc-nav-text">IOWorkerRequest</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#NIOServerCnxn"><span class="toc-nav-text">NIOServerCnxn</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E8%AF%BB%E4%BA%8B%E4%BB%B6"><span class="toc-nav-text">读事件</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%86%99%E4%BA%8B%E4%BB%B6"><span class="toc-nav-text">写事件</span></a></li></ol></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#NettyServerCnxnFactory"><span class="toc-nav-text">NettyServerCnxnFactory</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#maxClientCnxns-1"><span class="toc-nav-text">maxClientCnxns</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#channelRead"><span class="toc-nav-text">channelRead</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-text">总结</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#NIOServerCnxnFactory%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="toc-nav-text">NIOServerCnxnFactory的线程模型</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#NettyServerCnxnFactory%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="toc-nav-text">NettyServerCnxnFactory的线程模型</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -364,7 +369,7 @@
 
 <script>
   (function () {
-    var url = 'https://lanicc.github.io/2021/05/17/zk-code002/';
+    var url = 'https://lanicc.github.io/2021/08/29/zk-code002/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -414,34 +419,6 @@
 
 
 
-
-  <script>
-    var gitmentConfig = "lanicc";
-    if (gitmentConfig !== 'undefined') {
-      var gitment = new Gitment({
-        id: "ZooKeeper源码阅读——ServerCnxnFactory",
-        owner: "lanicc",
-        repo: "lanicc.github.io",
-        oauth: {
-          client_id: "24ccd128ebc34676a0dd",
-          client_secret: "118594e6b386af78bd03e5dac6c5588b93aa1acf"
-        },
-        theme: {
-          render(state, instance) {
-            const container = document.createElement('div')
-            container.lang = "en-US"
-            container.className = 'gitment-container gitment-root-container'
-            container.appendChild(instance.renderHeader(state, instance))
-            container.appendChild(instance.renderEditor(state, instance))
-            container.appendChild(instance.renderComments(state, instance))
-            container.appendChild(instance.renderFooter(state, instance))
-            return container;
-          }
-        }
-      })
-      gitment.render(document.getElementById('comments'))
-    }
-  </script>
 
 
 

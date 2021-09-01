@@ -20,18 +20,10 @@
 <link rel="stylesheet" href="/css/style.css">
 
   
-    
-<link rel="stylesheet" href="/css/plugins/gitment.css">
-
-  
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
   
-  
-    
-<script src="/js/gitment.js"></script>
-
   
   
   
@@ -212,7 +204,7 @@
 <p>从QuorumPeerMain.initializeAndRun方法可以看到</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (args.length == <span class="number">1</span> &amp;&amp; config.isDistributed()) &#123;</span><br><span class="line">        runFromConfig(config);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        LOG.warn(<span class="string">&quot;Either no config or no quorum defined in config, running in standalone mode&quot;</span>);</span><br><span class="line">        <span class="comment">// there is only server in the quorum -- run as standalone</span></span><br><span class="line">        ZooKeeperServerMain.main(args);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 <p>单机版的zk启动，走的是<code>ZooKeeperServerMain.main(args);</code>这条路</p>
-<h1 id="单机版"><a href="#单机版" class="headerlink" title="单机版"></a>单机版</h1><p>时序图(在idea中使用插件SequenceDiagram，Call depth设为3，从ZooKeeperServerMain#main开始生成时序图)<br><img src="/images/zk/ZooKeeperServerMain_main.png" alt="ZooKeeperServerMain_main.png"></p>
+<h1 id="单机模式"><a href="#单机模式" class="headerlink" title="单机模式"></a>单机模式</h1><p>时序图(在idea中使用插件SequenceDiagram，Call depth设为3，从ZooKeeperServerMain#main开始生成时序图)<br><img src="/images/zk/ZooKeeperServerMain_main.png" alt="ZooKeeperServerMain_main.png"></p>
 <h2 id="关键流程分析"><a href="#关键流程分析" class="headerlink" title="关键流程分析"></a>关键流程分析</h2><ul>
 <li>1.1.4.4 创建FileTxnSnapLog: FileTxnSnapLog数据管理器，用来操作事务日志和快照的工具类</li>
 <li>1.1.4.6 创建ZooKeeperServer: ZooKeeperServer是一个简单的单机版的zkServer，提供处理request请求的能力</li>
@@ -220,6 +212,22 @@
 <li>1.1.4.12 创建ServerCnxnFactory: ServerCnxnFactory是zk中客户端与服务端的网络IO管理器</li>
 <li>1.1.4.18 创建ContainerManager: ContainerManager用来管理容器节点的清理工作</li>
 </ul>
+<h3 id="ZooKeeperServer"><a href="#ZooKeeperServer" class="headerlink" title="ZooKeeperServer"></a>ZooKeeperServer</h3><p>1.4.1.1.6</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> ZooKeeperServer zkServer = <span class="keyword">new</span> ZooKeeperServer(jvmPauseMonitor, txnLog, config.tickTime, config.minSessionTimeout, config.maxSessionTimeout, config.listenBacklog, <span class="keyword">null</span>, config.initialConfig);</span><br></pre></td></tr></table></figure>
+
+<p>参数依次是:</p>
+<ul>
+<li><code>jvmPauseMonitor</code></li>
+<li><code>txnLog</code>: 数据管理器，用来操作事务日志和快照的工具类</li>
+<li><code>tickTime</code>: 通常被用来作为心跳、超时时间，官方文档上的解释是:the length of a single tick, which is the basic time unit used by ZooKeeper, as measured in milliseconds. It is used to regulate heartbeats, and timeouts. For example, the minimum session timeout will be two ticks.</li>
+<li><code>maxSessionTimeout</code>: 最小的<code>session</code>过期时间，默认是2个<code>tickTime</code></li>
+<li><code>maxSessionTimeout</code>: 最大的<code>session</code>过期时间，默认是20个<code>tickTime</code></li>
+<li><code>clientPortListenBacklog</code>: <code>ZooKeeper</code>服务端等待处理的请求队列最大长度</li>
+<li><code>initialConfig</code>: 启动时的配置文件内容</li>
+</ul>
+<h3 id="AdminServer"><a href="#AdminServer" class="headerlink" title="AdminServer"></a>AdminServer</h3><p>1.4.1.1.10 <code>adminServer = AdminServerFactory.createAdminServer()</code></p>
+<p><code>AdminServer</code> 的实现有两个，可以看下面的继承关系图<br><img src="/images/zk/AdminServer_impl.png" alt="AdminServer继承关系图"><br>启动时，<code>AdminServerFactory</code> 会根据配置 <code>zookeeper.admin.enableServer</code> 选择AdminServer</p>
+<p><code>DummyAdminServer</code>是一个空实现，不作任何事情，使用这个实现相当于是关闭了<code>AdminServer</code>功能<br><code>JettyAdminServer</code>是基于<code>Jetty Server</code>实现的，是默认的<code>AdminServer</code></p>
 <h3 id="ServerCnxnFactory"><a href="#ServerCnxnFactory" class="headerlink" title="ServerCnxnFactory"></a>ServerCnxnFactory</h3><h4 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h4><p>1.1.4.12 <code>cnxnFactory = ServerCnxnFactory.createFactory()</code><br><code>ServerCnxnFactory</code>的实现有两个，分别是基于NIO的实现和基于Netty的实现<br><img src="/images/zk/ServerCnxnFactory.png" alt="ServerCnxnFactory"><br>可以通过配置选择使用，配置项<code>zookeeper.serverCnxnFactory</code>，默认使用NIO的实现</p>
 <h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>1.1.4.13 <code>cnxnFactory.configure(config.getClientPortAddress(), config.getMaxClientCnxns(), config.getClientPortListenBacklog(), false)</code></p>
 <p>参数依次是：</p>
@@ -241,7 +249,7 @@
 <li>一个容器节点没有子节点的最长保留时间</li>
 </ul>
 <h4 id="启动-1"><a href="#启动-1" class="headerlink" title="启动"></a>启动</h4><p>1.1.4.19 <code>containerManager.start()</code><br>内部会启用一个线程，定时检查需要删除的节点，并将删除请求发送给zkServer的请求处理器</p>
-</section>
+<h1 id="集群模式"><a href="#集群模式" class="headerlink" title="集群模式"></a>集群模式</h1></section>
     <!-- Tags START -->
     
       <div class="tags">
@@ -271,9 +279,9 @@
       </a>
     
     
-      <a class="nav-right" href="/2021/05/17/zk-code002/">
+      <a class="nav-right" href="/2021/07/19/mvc-controless%E2%80%94%E2%80%94%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%BC%80%E6%BA%90%E5%BA%93/">
         
-          ZooKeeper源码阅读——ServerCnxnFactory
+          mvc-controlless——我的第一个开源库
         
         <span class="nav-arrow"> →</span>
       </a>
@@ -288,9 +296,15 @@
     
     <!-- 二维码 END -->
     
-      <!-- Gitment START -->
-      <div id="comments"></div>
-      <!-- Gitment END -->
+      <!-- Utterances START -->
+      <div id="utterances"></div>
+      <script src="https://utteranc.es/client.js"
+        repo="lanicc/lanicc.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async></script>    
+      <!-- Utterances END -->
     
   </article>
   <!-- Article END -->
@@ -300,7 +314,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%8D%95%E6%9C%BA%E7%89%88"><span class="toc-nav-text">单机版</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%85%B3%E9%94%AE%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90"><span class="toc-nav-text">关键流程分析</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ServerCnxnFactory"><span class="toc-nav-text">ServerCnxnFactory</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%88%9B%E5%BB%BA"><span class="toc-nav-text">创建</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="toc-nav-text">配置</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8"><span class="toc-nav-text">启动</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ContainerManager"><span class="toc-nav-text">ContainerManager</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%88%9B%E5%BB%BA-1"><span class="toc-nav-text">创建</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8-1"><span class="toc-nav-text">启动</span></a></li></ol></li></ol></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%8D%95%E6%9C%BA%E6%A8%A1%E5%BC%8F"><span class="toc-nav-text">单机模式</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%85%B3%E9%94%AE%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90"><span class="toc-nav-text">关键流程分析</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ZooKeeperServer"><span class="toc-nav-text">ZooKeeperServer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#AdminServer"><span class="toc-nav-text">AdminServer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ServerCnxnFactory"><span class="toc-nav-text">ServerCnxnFactory</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%88%9B%E5%BB%BA"><span class="toc-nav-text">创建</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="toc-nav-text">配置</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8"><span class="toc-nav-text">启动</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ContainerManager"><span class="toc-nav-text">ContainerManager</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%88%9B%E5%BB%BA-1"><span class="toc-nav-text">创建</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8-1"><span class="toc-nav-text">启动</span></a></li></ol></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F"><span class="toc-nav-text">集群模式</span></a></li></ol>
     
   </div>
 </aside>
@@ -360,34 +374,6 @@
 
 
 
-
-  <script>
-    var gitmentConfig = "lanicc";
-    if (gitmentConfig !== 'undefined') {
-      var gitment = new Gitment({
-        id: "ZooKeeper源码阅读——启动流程",
-        owner: "lanicc",
-        repo: "lanicc.github.io",
-        oauth: {
-          client_id: "24ccd128ebc34676a0dd",
-          client_secret: "118594e6b386af78bd03e5dac6c5588b93aa1acf"
-        },
-        theme: {
-          render(state, instance) {
-            const container = document.createElement('div')
-            container.lang = "en-US"
-            container.className = 'gitment-container gitment-root-container'
-            container.appendChild(instance.renderHeader(state, instance))
-            container.appendChild(instance.renderEditor(state, instance))
-            container.appendChild(instance.renderComments(state, instance))
-            container.appendChild(instance.renderFooter(state, instance))
-            return container;
-          }
-        }
-      })
-      gitment.render(document.getElementById('comments'))
-    }
-  </script>
 
 
 
