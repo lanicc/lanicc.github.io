@@ -10,7 +10,7 @@
   
   <title>
     
-      lanicc
+      不能用平常心对待任何一次生产操作 | lanicc
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -188,72 +188,146 @@
 </header>
 
     <div id="article-banner">
-  <h2>Archives</h2>
-  <p class="post-date">Archives</p>
+  <h2>不能用平常心对待任何一次生产操作</h2>
+  <p class="post-date">2021-09-02</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
 </div>
-<main class="app-body" id="archives">
-  
-  
-  
-    <section class="time-section">
-  <h1 class="section-year">
-    2021
-  </h1>
-  <div class="section-list">
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><p>我需要一个程序员鼓励师</p>
+<span id="more"></span>
+
+<p>就像生产环境的报警一样，如果滥加报警，就会导致群里全是报警消息，有用的或者说需要人工重点关注的消息几乎没有，那这样的报警会让人麻痹，甚至起到的作用是负面的。一旦某一天出现真正需要关注的报警，可能会因为人已经被麻痹了，而忽略报警的情况。这就是的报警失去了意义。</p>
+<p>这里面的道理就是，一件日常会发生的事，可能对我们自己来说平常不过，但可能对别人来说都很关键。<br>今天我就经历了这么一件事。</p>
+<p>业务方A反馈搜索引擎同步服务出现消息堆积，想让我帮忙处理，消息堆积对我来说是个很平常很平常的事情，一般不会主动处理，有人反馈就帮忙看看。业务反馈想要一个快速解决堆积的方案，因为是多个业务方共用一个topic，导致互相影响，期初我查看了他们的应用数据，才8万+，很少，所以认为不是他们的数据流量过大引起的堆积问题，而是别的业务数据量太大影响的他们。因此我给出的方案是，帮他们切换到一个流量小的topic，业务同意了。我正常操作，操作完成后，还很谨慎的要求和业务方一起验证一下，验证通过后才关闭操作窗口。以为一切就这么结束了。<br>谁想，另一个业务部门B反馈他们的数据延迟了，但他们的数据变更并不多。我一想就知道了，是因为我前面操作的索引导致的。但此时，业务部门B也通知了运维，运维部因为上周刚刚发生了P0事故的原因，都很谨慎，赶紧找到我这边，想我了解情况，经过我们大家一合计，为了避免影响这个无辜的业务部门B，让我这边把索引配置切回去。过了一会，业务方恢B复正常使用了。但业务方A的堆积还在，他不罢休，问原因。我就开始查日志，查日志发现，他们的表有大量的插入和删除操作，截图给业务看，业务不信。。。对我说，我们这边业务都停了，怎么还有会有消息！！！<br>我有日志啊，你不信！！！幸好运维大哥们都在，查数据库监控，查到了他们插入和删除的sql，导出，发送，业务排查问题。</p>
+<p>后来经过排查果然是他们自己的问题，他们一个大部门下的接口调用，出现了环，在一种条件下会有死循环。。。</p>
+<blockquote>
+<p>其实对我来说处理堆积真的是很常见的操作，业务方找我处理，我就无脑操作，于是便除了今天这个事。但如果我多问一句，你们的数据变更多吗，如果我多看一下ES写入监控，你们的数据写入流量有点大，可能就不会影响到业务B了。以后处理生产的事情，还是谨慎些好，年轻人要成长了!</p>
+</blockquote>
+<p>今天处理这个事，中间还有很多波折，感觉还挺累的，一边要和业务解释，一边要和运维解释，一边要处理事故。我觉得我需要一个人支持一个，一个backup！！！</p>
+<p>事后，还有给领导汇报，我的领导还不在，上周的事故复盘就不在，我一个人人孤苦伶仃的，贼难受。这次复盘估计也不会在，弱小的心灵没有安慰啊。</p>
+<p>需要鼓励</p>
+</section>
+    <!-- Tags START -->
     
-    
-      <div class="section-list-item">
-        <a href="/2021/09/02/daily-0000/" class="archive-title">不能用平常心对待任何一次生产操作</a>
-        <p class="archive-date">09-02</p>
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#日常记录" >
+    <span class="tag-code">日常记录</span>
+  </a>
+
       </div>
     
-      <div class="section-list-item">
-        <a href="/2021/09/02/netty-code000/" class="archive-title">netty-code000</a>
-        <p class="archive-date">09-02</p>
-      </div>
+    <!-- Tags END -->
+    <!-- NAV START -->
     
-      <div class="section-list-item">
-        <a href="/2021/08/29/zk-code003/" class="archive-title">ZooKeeper源码阅读——ZooKeeperServer</a>
-        <p class="archive-date">08-29</p>
-      </div>
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <div class="section-list-item">
-        <a href="/2021/08/29/zk-code002/" class="archive-title">ZooKeeper源码阅读——ServerCnxnFactory</a>
-        <p class="archive-date">08-29</p>
-      </div>
+      <a class="nav-left" href="/2021/09/02/netty-code000/">
+        <span class="nav-arrow">← </span>
+        
+          netty-code000
+        
+      </a>
     
-      <div class="section-list-item">
-        <a href="/2021/07/23/Spring%E5%9D%91Valid/" class="archive-title">Spring的坑——Valid</a>
-        <p class="archive-date">07-23</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/07/19/mvc-controless%E2%80%94%E2%80%94%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%BC%80%E6%BA%90%E5%BA%93/" class="archive-title">mvc-controlless——我的第一个开源库</a>
-        <p class="archive-date">07-19</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/05/07/zk-code001/" class="archive-title">ZooKeeper源码阅读——启动流程</a>
-        <p class="archive-date">05-07</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/05/05/zk-code000/" class="archive-title">ZooKeeper源码阅读——源码编译</a>
-        <p class="archive-date">05-05</p>
-      </div>
     
   </div>
-</section>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+    <!-- 二维码 END -->
+    
+      <!-- Utterances START -->
+      <div id="utterances"></div>
+      <script src="https://utteranc.es/client.js"
+        repo="lanicc/lanicc.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async></script>    
+      <!-- Utterances END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
   
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">Catalog</strong>
+    
+      <ol class="nav">none</ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
 </main>
 
 <script>
   (function () {
-    var url = 'https://lanicc.github.io/archives/index.html';
-    $('#article-banner').geopattern(url);
-    $('.header').removeClass('fixed-header');
+    var url = 'https://lanicc.github.io/2021/09/02/daily-0000/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', '/css/images/error_icon.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== '/css/images/error_icon.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
   })();
 </script>
+
+
+
+
+
+
+
     <div class="scroll-top">
   <span class="arrow-icon"></span>
 </div>
