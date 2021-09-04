@@ -10,7 +10,7 @@
   
   <title>
     
-      不能用平常心对待任何一次生产操作 | lanicc
+      canal改造记录 | lanicc
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -188,8 +188,8 @@
 </header>
 
     <div id="article-banner">
-  <h2>不能用平常心对待任何一次生产操作</h2>
-  <p class="post-date">2021-09-02</p>
+  <h2>canal改造记录</h2>
+  <p class="post-date">2021-09-04</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -197,34 +197,42 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><p>我需要一个程序员鼓励师</p>
+    <section class="markdown-content"><p>canal改造日记</p>
 <span id="more"></span>
 
-<p>就像生产环境的报警一样，如果滥加报警，就会导致群里全是报警消息，有用的或者说需要人工重点关注的消息几乎没有，那这样的报警会让人麻痹，甚至起到的作用是负面的。一旦某一天出现真正需要关注的报警，可能会因为人已经被麻痹了，而忽略报警的情况。这就是的报警失去了意义。</p>
-<p>这里面的道理就是，一件日常会发生的事，可能对我们自己来说平常不过，但可能对别人来说都很关键。<br>今天我就经历了这么一件事。</p>
-<p>业务方A反馈搜索引擎同步服务出现消息堆积，想让我帮忙处理，消息堆积对我来说是个很平常很平常的事情，一般不会主动处理，有人反馈就帮忙看看。业务反馈想要一个快速解决堆积的方案，因为是多个业务方共用一个topic，导致互相影响，起初我查看了他们的应用数据，才8万+，很少，所以认为不是他们的数据流量过大引起的堆积问题，而是别的业务数据量太大影响的他们。因此我给出的方案是，帮他们切换到一个流量小的topic，业务同意了。我正常操作，操作完成后，还很谨慎的要求和业务方一起验证一下，验证通过后才关闭操作窗口。以为一切就这么结束了。<br>谁想，另一个业务部门B反馈他们的数据延迟了，但他们的数据变更并不多。我一想就知道了，是因为我前面操作的索引导致的。但此时，业务部门B也通知了运维，运维部因为上周刚刚发生了P0事故的原因，都很谨慎，赶紧找到我这边，想我了解情况，经过我们大家一合计，为了避免影响这个无辜的业务部门B，让我这边把索引配置切回去。过了一会，业务方恢B复正常使用了。但业务方A的堆积还在，他不罢休，问原因。我就开始查日志，查日志发现，他们的表有大量的插入和删除操作，截图给业务看，业务不信。。。对我说，我们这边业务都停了，怎么还有会有消息！！！<br>我有日志啊，你不信！！！幸好运维大哥们都在，查数据库监控，查到了他们插入和删除的sql，导出，发送，业务排查问题。</p>
-<p>后来经过排查果然是他们自己的问题，他们一个大部门下的接口调用，出现了环，在一种条件下会有死循环。。。</p>
+<p><code>canal</code>如果配置成<code>admin</code>模式，但<code>admin</code>没有启动的话，会导致<code>canal</code>也无法启动，这个修改是为了将<code>canal</code>和<code>admin</code>关系拆分，使得<code>canal</code>可以独立运行，即<code>canal</code>直接访问库。</p>
+<h2 id="需要改动的地方"><a href="#需要改动的地方" class="headerlink" title="需要改动的地方"></a>需要改动的地方</h2><p><code>PlainCanalConfigClient</code></p>
 <blockquote>
-<p>其实对我来说处理堆积真的是很常见的操作，业务方找我处理，我就无脑操作，谁知道今天怎么就出事了。但如果我多问一句，你们的数据变更多吗，如果我多看一下ES写入监控，你们的数据写入流量有点大啊，可能就会提前判断出业务A有问题了，可能就不会影响到业务B了。以后处理生产的事情，还是谨慎些好，年轻人要成长了!</p>
+<p>贼坑的地方，<code>PlainCanalConfigClient</code>中的接口只要是入参<code>md5</code>不为空，都是为了比较对应的配置是否变化，不变化的返回null即可，如果有变化，才不返回null</p>
 </blockquote>
-<p>今天处理这个事，中间还有很多波折，感觉还挺累的，一边要和业务解释，一边要和运维解释，一边要处理事故。我觉得我需要一个人支持一个，一个backup！！！</p>
-<p>事后，还有给领导汇报，我的领导还不在，上周的事故复盘就不在，我一个人人孤苦伶仃的，贼难受。这次复盘估计也不会在，弱小的心灵没有安慰啊。</p>
-<p>需要鼓励</p>
-<p>加油吧!</p>
-<blockquote>
-<p>今天很感谢运维同学，刚哥，还有中间件的大哥们</p>
-</blockquote>
+<h3 id="改动增加的配置"><a href="#改动增加的配置" class="headerlink" title="改动增加的配置"></a>改动增加的配置</h3><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">canal.manager.mode</span> = <span class="string">db</span></span><br><span class="line"><span class="meta">canal.manager.jdbc.address</span> = <span class="string">127.0.0.1</span></span><br><span class="line"><span class="meta">canal.manager.jdbc.port</span> = <span class="string">3306</span></span><br><span class="line"><span class="meta">canal.manager.jdbc.username</span> = <span class="string">root</span></span><br><span class="line"><span class="meta">canal.manager.jdbc.password</span> = <span class="string">canal_MYSQL</span></span><br><span class="line"><span class="meta">canal.manager.jdbc.database</span> = <span class="string">canal_manager</span></span><br></pre></td></tr></table></figure>
+
+<p><code>canal.manager.mode</code>如果是<code>db</code>就是标识<code>canal</code>直连数据库，不依赖<code>admin</code></p>
+<h2 id="client-adapter"><a href="#client-adapter" class="headerlink" title="client-adapter"></a>client-adapter</h2><h3 id="api包"><a href="#api包" class="headerlink" title="api包"></a>api包</h3><p>抽出了一个<code>api</code>的包，方便后续<code>adapter</code>的开发</p>
+<h3 id="弃用的开源的功能"><a href="#弃用的开源的功能" class="headerlink" title="弃用的开源的功能"></a>弃用的开源的功能</h3><ul>
+<li>BootstrapConfiguration：删除了自动配置（META-INF/spring.factories）</li>
+<li>ApplicationConfigMonitor:<br>不注册到Spring容器，该类是用来扫描配置文件的变更的（配合com.alibaba.otter.canal.adapter.launcher.monitor.remote包可以实现从数据库动态加载配置）</li>
+<li>CanalAdapterService: 删除@RefreshScope注解，不需要这个功能</li>
+</ul>
+<h3 id="新增的功能"><a href="#新增的功能" class="headerlink" title="新增的功能"></a>新增的功能</h3><ul>
+<li>CanalAdapterLoader: 增加CanalClientConfig.CanalAdapter维度的动态监听和暂停，CanalAdapterService也增加了相应的接口</li>
+<li>InstanceConfigMonitor: 增加了基于canalInstance维度的配置监听，配合com.alibaba.otter.canal.adapter.launcher.monitor.rmt包，完成监听数据库配置</li>
+</ul>
+<h3 id="基于数据库的动态配置监听"><a href="#基于数据库的动态配置监听" class="headerlink" title="基于数据库的动态配置监听"></a>基于数据库的动态配置监听</h3><ol>
+<li>查询配置：sql<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> cac.id, cic.name, cac.content, cac.modified_time</span><br><span class="line"><span class="keyword">from</span> canal_adapter_config cac</span><br><span class="line"><span class="keyword">inner</span> <span class="keyword">join</span> canal_instance_config cic <span class="keyword">on</span> cac.id <span class="operator">=</span> cic.id</span><br></pre></td></tr></table></figure></li>
+<li>对比每一项的modified_time是否有更新，有更新的认为配置更改了</li>
+<li>根据1中的sql，可知CanalClientConfig.CanalAdapter中的name，是canal_instance_config的name</li>
+</ol>
+<h3 id="canal-adapter-config表使用说明"><a href="#canal-adapter-config表使用说明" class="headerlink" title="canal_adapter_config表使用说明"></a>canal_adapter_config表使用说明</h3><ul>
+<li>id: canal_instance_config的id</li>
+<li>category: 目前没用</li>
+<li>name: 目前没用</li>
+<li>status: 0表示正常启用，其他表示不启用</li>
+<li>content: yaml格式的配置，示例如下：<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">groups:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">groupId:</span> <span class="string">g1</span></span><br><span class="line">    <span class="attr">outerAdapters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">logger</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">groupId:</span> <span class="string">g2</span></span><br><span class="line">    <span class="attr">outerAdapters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">logger</span></span><br></pre></td></tr></table></figure></li>
+<li>modified_time: 扫描数据库时，会根据modified_time判断配置是否修改</li>
+</ul>
 </section>
     <!-- Tags START -->
-    
-      <div class="tags">
-        <span>Tags:</span>
-        
-  <a href="/tags#日常记录" >
-    <span class="tag-code">日常记录</span>
-  </a>
-
-      </div>
     
     <!-- Tags END -->
     <!-- NAV START -->
@@ -232,20 +240,13 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/08/29/zk-code003/">
+      <a class="nav-left" href="/2021/09/03/idea0000/">
         <span class="nav-arrow">← </span>
-        
-          ZooKeeper源码阅读——ZooKeeperServer
-        
-      </a>
-    
-    
-      <a class="nav-right" href="/2021/09/03/idea0000/">
         
           杂七杂八的想法
         
-        <span class="nav-arrow"> →</span>
       </a>
+    
     
   </div>
 
@@ -275,7 +276,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="nav">none</ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%9C%80%E8%A6%81%E6%94%B9%E5%8A%A8%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="toc-nav-text">需要改动的地方</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%94%B9%E5%8A%A8%E5%A2%9E%E5%8A%A0%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="toc-nav-text">改动增加的配置</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#client-adapter"><span class="toc-nav-text">client-adapter</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#api%E5%8C%85"><span class="toc-nav-text">api包</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BC%83%E7%94%A8%E7%9A%84%E5%BC%80%E6%BA%90%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="toc-nav-text">弃用的开源的功能</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%96%B0%E5%A2%9E%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="toc-nav-text">新增的功能</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AE%E7%9B%91%E5%90%AC"><span class="toc-nav-text">基于数据库的动态配置监听</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#canal-adapter-config%E8%A1%A8%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"><span class="toc-nav-text">canal_adapter_config表使用说明</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -285,7 +286,7 @@
 
 <script>
   (function () {
-    var url = 'https://lanicc.github.io/2021/09/02/daily-0000/';
+    var url = 'https://lanicc.github.io/2021/09/04/canal0000/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
