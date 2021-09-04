@@ -231,6 +231,17 @@
 <li>content: yaml格式的配置，示例如下：<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">groups:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">groupId:</span> <span class="string">g1</span></span><br><span class="line">    <span class="attr">outerAdapters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">logger</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">groupId:</span> <span class="string">g2</span></span><br><span class="line">    <span class="attr">outerAdapters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">logger</span></span><br></pre></td></tr></table></figure></li>
 <li>modified_time: 扫描数据库时，会根据modified_time判断配置是否修改</li>
 </ul>
+<h2 id="待研究"><a href="#待研究" class="headerlink" title="待研究"></a>待研究</h2><ul>
+<li><code>canal</code>主备问题</li>
+<li><code>adapter</code>主备问题</li>
+<li><code>adapter</code>的SPI方式类隔离的问题</li>
+<li><code>admin</code>端管理<code>adapter</code></li>
+</ul>
+<h1 id="改造之后的对比"><a href="#改造之后的对比" class="headerlink" title="改造之后的对比"></a>改造之后的对比</h1><ul>
+<li>可以在<code>admin</code>控制台管理<code>adapter</code></li>
+<li><code>adapter</code>支持配置动态刷新(基于数据库)</li>
+<li><code>canal</code>在<code>manager</code>模式下支持独立运行</li>
+</ul>
 </section>
     <!-- Tags START -->
     
@@ -285,7 +296,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%9C%80%E8%A6%81%E6%94%B9%E5%8A%A8%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="toc-nav-text">需要改动的地方</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%94%B9%E5%8A%A8%E5%A2%9E%E5%8A%A0%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="toc-nav-text">改动增加的配置</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#client-adapter"><span class="toc-nav-text">client-adapter</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#api%E5%8C%85"><span class="toc-nav-text">api包</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BC%83%E7%94%A8%E7%9A%84%E5%BC%80%E6%BA%90%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="toc-nav-text">弃用的开源的功能</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%96%B0%E5%A2%9E%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="toc-nav-text">新增的功能</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AE%E7%9B%91%E5%90%AC"><span class="toc-nav-text">基于数据库的动态配置监听</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#canal-adapter-config%E8%A1%A8%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"><span class="toc-nav-text">canal_adapter_config表使用说明</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%9C%80%E8%A6%81%E6%94%B9%E5%8A%A8%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="toc-nav-text">需要改动的地方</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%94%B9%E5%8A%A8%E5%A2%9E%E5%8A%A0%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="toc-nav-text">改动增加的配置</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#client-adapter"><span class="toc-nav-text">client-adapter</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#api%E5%8C%85"><span class="toc-nav-text">api包</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BC%83%E7%94%A8%E7%9A%84%E5%BC%80%E6%BA%90%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="toc-nav-text">弃用的开源的功能</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%96%B0%E5%A2%9E%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="toc-nav-text">新增的功能</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AE%E7%9B%91%E5%90%AC"><span class="toc-nav-text">基于数据库的动态配置监听</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#canal-adapter-config%E8%A1%A8%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"><span class="toc-nav-text">canal_adapter_config表使用说明</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%BE%85%E7%A0%94%E7%A9%B6"><span class="toc-nav-text">待研究</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%94%B9%E9%80%A0%E4%B9%8B%E5%90%8E%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="toc-nav-text">改造之后的对比</span></a>
     
   </div>
 </aside>
