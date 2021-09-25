@@ -10,7 +10,7 @@
   
   <title>
     
-      lanicc
+      Elasticsearch插件开发——Action | lanicc
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -188,87 +188,142 @@
 </header>
 
     <div id="article-banner">
-  <h2>Archives</h2>
-  <p class="post-date">Archives</p>
+  <h2>Elasticsearch插件开发——Action</h2>
+  <p class="post-date">2021-09-25</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
 </div>
-<main class="app-body" id="archives">
-  
-  
-  
-    <section class="time-section">
-  <h1 class="section-year">
-    2021
-  </h1>
-  <div class="section-list">
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><p>最近在做一个关于ES的服务性能优化，因此对es插件开发做了一下技术调研</p>
+<span id="more"></span>
+
+<p>关于插件开发，官方文档介绍的比较少不够清晰<br>官方文档：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/plugins/5.5/index.html">https://www.elastic.co/guide/en/elasticsearch/plugins/5.5/index.html</a></p>
+<p>在快速开始的过程中遇到很多麻烦，比如没有示例工程，拓展点介绍不清楚，依赖注入等，我想用的自定义<code>ActionRequest</code>，但网上找到的大部分示例都是<code>Rest</code>方式的拓展，相对比较简单，好不容易找到了一个比较契合的，但是版本还是2.x的，比较久了。<br>奉上我最终完成的demo：<a target="_blank" rel="noopener" href="https://github.com/lanicc/elastic-plugin-sample">https://github.com/lanicc/elastic-plugin-sample</a></p>
+</section>
+    <!-- Tags START -->
     
-    
-      <div class="section-list-item">
-        <a href="/2021/09/25/elastic0000/" class="archive-title">Elasticsearch插件开发——Action</a>
-        <p class="archive-date">09-25</p>
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#elasticsearch" >
+    <span class="tag-code">elasticsearch</span>
+  </a>
+
+  <a href="/tags#es插件开发" >
+    <span class="tag-code">es插件开发</span>
+  </a>
+
       </div>
     
-      <div class="section-list-item">
-        <a href="/2021/09/18/daily-0001/" class="archive-title">最近的一些感想</a>
-        <p class="archive-date">09-18</p>
-      </div>
+    <!-- Tags END -->
+    <!-- NAV START -->
     
-      <div class="section-list-item">
-        <a href="/2021/09/04/canal0000/" class="archive-title">canal改造记录</a>
-        <p class="archive-date">09-04</p>
-      </div>
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <div class="section-list-item">
-        <a href="/2021/09/03/idea0000/" class="archive-title">杂七杂八的想法</a>
-        <p class="archive-date">09-03</p>
-      </div>
+      <a class="nav-left" href="/2021/09/18/daily-0001/">
+        <span class="nav-arrow">← </span>
+        
+          最近的一些感想
+        
+      </a>
     
-      <div class="section-list-item">
-        <a href="/2021/09/02/daily-0000/" class="archive-title">不能用平常心对待任何一次生产操作</a>
-        <p class="archive-date">09-02</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/08/29/zk-code003/" class="archive-title">ZooKeeper源码阅读——ZooKeeperServer</a>
-        <p class="archive-date">08-29</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/08/29/zk-code002/" class="archive-title">ZooKeeper源码阅读——ServerCnxnFactory</a>
-        <p class="archive-date">08-29</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/07/23/Spring%E5%9D%91Valid/" class="archive-title">Spring的坑——Valid</a>
-        <p class="archive-date">07-23</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/07/19/mvc-controless%E2%80%94%E2%80%94%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%BC%80%E6%BA%90%E5%BA%93/" class="archive-title">mvc-controlless——我的第一个开源库</a>
-        <p class="archive-date">07-19</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/05/07/zk-code001/" class="archive-title">ZooKeeper源码阅读——启动流程</a>
-        <p class="archive-date">05-07</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/05/05/zk-code000/" class="archive-title">ZooKeeper源码阅读——源码编译</a>
-        <p class="archive-date">05-05</p>
-      </div>
     
   </div>
-</section>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+    <!-- 二维码 END -->
+    
+      <!-- Utterances START -->
+      <div id="utterances"></div>
+      <script src="https://utteranc.es/client.js"
+        repo="lanicc/lanicc.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async></script>    
+      <!-- Utterances END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
   
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">Catalog</strong>
+    
+      <ol class="nav">none</ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
 </main>
 
 <script>
   (function () {
-    var url = 'https://lanicc.github.io/tags/valid/index.html';
-    $('#article-banner').geopattern(url);
-    $('.header').removeClass('fixed-header');
+    var url = 'https://lanicc.github.io/2021/09/25/elastic0000/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', '/css/images/error_icon.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== '/css/images/error_icon.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
   })();
 </script>
+
+
+
+
+
+
+
     <div class="scroll-top">
   <span class="arrow-icon"></span>
 </div>
